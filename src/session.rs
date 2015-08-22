@@ -9,7 +9,7 @@
 use std::io;
 use std::ffi::OsStr;
 use std::path::{PathBuf, Path};
-use std::thread::{Builder, JoinGuard};
+use thread_scoped::{JoinGuard, scoped};
 use libc::{EAGAIN, EINTR, ENODEV, ENOENT};
 use channel;
 use channel::Channel;
@@ -126,11 +126,12 @@ impl<'a> BackgroundSession<'a> {
     /// the filesystem is unmounted and the given session ends.
     pub fn new<FS: Filesystem+Send+'a> (se: Session<FS>) -> io::Result<BackgroundSession<'a>> {
         let mountpoint = se.mountpoint().to_path_buf();
-        let builder = Builder::new().name(format!("FUSE {}", mountpoint.display()));
-        let guard = try!(builder.scoped(move || {
-            let mut se = se;
-            se.run();
-        }));
+        let guard = unsafe { // XXX: we should try not to leak from scoped
+            scoped(move || {
+                let mut se = se;
+                se.run();
+            })
+        };
         Ok(BackgroundSession { mountpoint: mountpoint, guard: guard })
     }
 }

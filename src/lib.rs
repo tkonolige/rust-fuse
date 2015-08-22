@@ -10,7 +10,6 @@
 #![feature(convert)]
 #![feature(fnbox)]
 #![feature(libc)]
-#![feature(scoped)]
 #![feature(vec_push_all)]
 
 #![warn(missing_docs, bad_style, unused, unused_extern_crates, unused_import_braces, unused_qualifications)]
@@ -19,6 +18,7 @@ extern crate libc;
 #[macro_use]
 extern crate log;
 extern crate time;
+extern crate thread_scoped;
 
 use std::convert::AsRef;
 use std::io;
